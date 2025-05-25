@@ -66,7 +66,7 @@ def evaluate(model, device, test_loader, criterion):
 
 model = BaselineCNN().to(device)
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.5)
 
 train_losses, test_losses = [], []
 train_accuracies, test_accuracies = [], []
@@ -97,59 +97,3 @@ plt.legend()
 plt.tight_layout()
 plt.show()
 
-#Variances
-#1
-optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-
-# 2. Learning Rate test
-optimizer = optim.Adam(model.parameters(), lr=0.0001)  # too low
-optimizer = optim.Adam(model.parameters(), lr=0.01)    # too high
-
-# 3. Batch size test
-# Change in DataLoader:
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-test_loader = DataLoader(test_dataset, batch_size=1000)
-
-# 4. Dropout rate test
-# Change in model's dropout layer:
-class BaselineCNN(nn.Module):
-    def __init__(self):
-        super(BaselineCNN, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.fc1 = nn.Linear(64 * 7 * 7, 128)
-        self.dropout = nn.Dropout(0.2)
-        self.fc2 = nn.Linear(128, 10)
-
-    def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 64 * 7 * 7)
-        x = F.relu(self.fc1(x))
-        x = self.dropout(x)
-        return self.fc2(x)  # logits
- 
-class BaselineCNN(nn.Module):
-    def __init__(self):
-        super(BaselineCNN, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=3, padding=1)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
-        self.fc1 = nn.Linear(64 * 7 * 7, 128)
-        self.dropout = nn.Dropout(0.8)
-        self.fc2 = nn.Linear(128, 10)
-
-    def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 64 * 7 * 7)
-        x = F.relu(self.fc1(x))
-        x = self.dropout(x)
-        return self.fc2(x)  # logits
-   
-
-# 5. Weight initialization test
-def init_weights(m):
-    if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
-        torch.nn.init.kaiming_uniform_(m.weight)
